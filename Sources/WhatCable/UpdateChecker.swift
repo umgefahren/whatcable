@@ -35,7 +35,8 @@ final class UpdateChecker: ObservableObject {
     func start() {
         check(silent: true)
         timer = Timer.scheduledTimer(withTimeInterval: Self.pollInterval, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.check(silent: true) }
+            guard let self else { return }
+            Task { @MainActor in self.check(silent: true) }
         }
     }
 
@@ -58,8 +59,8 @@ final class UpdateChecker: ObservableObject {
         request.timeoutInterval = 15
 
         URLSession.shared.dataTask(with: request) { [weak self] data, _, error in
+            guard let self else { return }
             Task { @MainActor in
-                guard let self else { return }
                 self.isChecking = false
                 self.lastCheck = Date()
                 // If a manual click arrived during the in-flight check, this
